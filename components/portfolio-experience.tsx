@@ -8,6 +8,7 @@ import { Magnetic } from '@/components/magnetic'
 import { ScrollRevealText } from '@/components/scroll-reveal-text'
 import { submitInquiry } from '@/app/actions/contact'
 
+// 1. Updated Type to include image2
 type DBProject = {
   id: string
   title: string
@@ -15,6 +16,7 @@ type DBProject = {
   stack: string
   url: string | null
   image: string | null
+  image2: string | null // <-- Added secondary image
   featured: boolean
   createdAt: Date
 }
@@ -41,13 +43,13 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
   const [activeSkill, setActiveSkill] = useState('React')
   const [navTheme, setNavTheme] = useState<'dark' | 'light' | 'lime'>('dark')
   const [openStep, setOpenStep] = useState<number | null>(null)
-  
-  // 1. ADDED STATE: Tracks the current section for the active nav highlight
   const [activeSection, setActiveSection] = useState('top') 
+  
+  // NEW: State for the project modal
+  const [selectedProject, setSelectedProject] = useState<any | null>(null)
   
   const filters = ['All', 'Frontend', 'Full-stack', 'Mobile']
 
-  // PIXEL-PERFECT NAVBAR SCROLL LISTENER
   useEffect(() => {
     let ticking = false
 
@@ -55,16 +57,13 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
       const navHeight = 80
       const sections = document.querySelectorAll('section, footer')
       let currentTheme = 'dark'
-      let currentActive = 'top' // Default to top
+      let currentActive = 'top'
 
       sections.forEach(section => {
         const rect = section.getBoundingClientRect()
-        
-        // If the top of the section crosses the navbar line
         if (rect.top <= navHeight + 20) { 
           const id = section.id
-          currentActive = id // Update the active section
-
+          currentActive = id 
           if (id === 'top' || id === 'expertise') currentTheme = 'dark'
           else if (id === 'process') currentTheme = 'lime'
           else currentTheme = 'light'
@@ -72,7 +71,7 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
       })
 
       setNavTheme(currentTheme as 'dark' | 'light' | 'lime')
-      setActiveSection(currentActive) // Set the active link
+      setActiveSection(currentActive)
       ticking = false
     }
 
@@ -84,12 +83,11 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    updateNavTheme() // Initial check on load
+    updateNavTheme() 
 
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // PROJECT SPOTLIGHT MOUSE TRACKER
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const card = e.currentTarget
     const rect = card.getBoundingClientRect()
@@ -113,6 +111,7 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         stack: stackArray,
         url: project.url,
         image: project.image,
+        image2: project.image2, // <-- Added secondary image here
         type,
         year: new Date(project.createdAt).getFullYear().toString(),
         tone: ['lime', 'cream', 'blue'][index % 3],
@@ -130,7 +129,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
 
   return (
     <main className="portfolio-shell">
-      {/* DYNAMIC NAVBAR */}
       <header className={`site-nav nav-theme-${navTheme}`}>
         <a className="wordmark" href="#top" aria-label="Joe Ama home"><span>AM</span><i /></a>
 
@@ -143,17 +141,11 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
           {menuOpen ? <X /> : <Menu />}
         </motion.button>
 
-        {/* DESKTOP NAV */}
         <nav className="nav-links desktop-nav" aria-label="Main navigation">
           {navLinks.map((item) => {
-            // 2. APPLY ACTIVE CLASS
             const isActive = activeSection === item.toLowerCase();
             return (
-              <a 
-                key={item} 
-                href={`#${item.toLowerCase()}`}
-                className={isActive ? 'active' : ''}
-              >
+              <a key={item} href={`#${item.toLowerCase()}`} className={isActive ? 'active' : ''}>
                 {item}
               </a>
             )
@@ -161,7 +153,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
           <a className="nav-cta" href="#contact">Let&apos;s work together <ArrowUpRight /></a>
         </nav>
 
-        {/* MOBILE NAV OVERLAY */}
         <AnimatePresence>
           {menuOpen && (
             <motion.nav
@@ -173,7 +164,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
               aria-label="Mobile navigation"
             >
               {navLinks.map((item, i) => {
-                // 3. APPLY ACTIVE CLASS TO MOBILE
                 const isActive = activeSection === item.toLowerCase();
                 return (
                   <motion.a
@@ -206,7 +196,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         </AnimatePresence>
       </header>
 
-      {/* HERO SECTION */}
       <section className="hero" id="top">
         <div className="hero-copy">
           <p className="eyebrow"><span className="status-dot" /> Available for projects <span className="mono">/ 2026</span></p>
@@ -230,7 +219,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         <a className="scroll-cue" href="#about"><span>Scroll to explore</span><ArrowDownRight /></a>
       </section>
 
-      {/* ABOUT SECTION */}
       <section className="about section-light" id="about">
         <ScrollReveal>
           <div className="section-index">01 / About</div>
@@ -255,7 +243,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         </div>
       </section>
 
-      {/* EXPERTISE SECTION */}
       <section className="expertise" id="expertise">
         <ScrollReveal>
           <div className="section-index">02 / Expertise</div>
@@ -302,7 +289,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         </div>
       </section>
 
-      {/* PROJECTS SECTION */}
       <section className="projects section-light" id="projects">
         <ScrollReveal>
           <div className="section-index">03 / Selected work</div>
@@ -333,17 +319,16 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
             visibleProjects.map((project, index) => (
               <ScrollReveal key={project.id} delay={index * 150} className="h-full">
                 <motion.article
-                  className={`project-card project-${project.tone} h-full`}
+                  className={`project-card project-${project.tone} h-full cursor-pointer`}
                   onMouseMove={handleMouseMove}
+                  onClick={() => setSelectedProject(project)} // <-- Opens Modal
                   whileHover={{ y: -10, scale: 1.02 }}
                   whileTap={{ scale: 0.98, y: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
                   <div className="project-spotlight" />
-                                    <div className="project-art">
+                  <div className="project-art">
                     <span className="project-art-number">0{index + 1}</span>
-                    
-                    {/* Conditionally render the image if it exists */}
                     {project.image ? (
                       <img src={project.image} alt={project.title} className="project-image" />
                     ) : (
@@ -361,13 +346,9 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
                   <p>{project.description}</p>
                   <div className="project-footer">
                     <span>{project.stack.join('  /  ')}</span>
-                    {project.url ? (
-                      <a href={project.url} target="_blank" rel="noopener noreferrer" aria-label={`View ${project.title}`}>
-                        <MoveUpRight />
-                      </a>
-                    ) : (
+                    <div>
                       <MoveUpRight />
-                    )}
+                    </div>
                   </div>
                 </motion.article>
               </ScrollReveal>
@@ -380,7 +361,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         </div>
       </section>
 
-      {/* PROCESS SECTION */}
       <section className="process" id="process">
         <ScrollReveal>
           <div className="section-index">04 / Process</div>
@@ -397,7 +377,7 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
               const isOpen = openStep === index;
               return (
                 <motion.div
-                  layout // Smoothly animates height changes
+                  layout
                   onClick={() => setOpenStep(isOpen ? null : index)}
                   className={`process-step ${isOpen ? 'is-open' : ''}`}
                   key={step.title}
@@ -430,14 +410,12 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         </ScrollReveal>
       </section>
 
-      {/* CONTACT SECTION */}
       <section className="contact section-light" id="contact">
         <ScrollReveal>
           <div className="section-index">05 / Contact</div>
         </ScrollReveal>
 
         <div className="contact-grid">
-          {/* Left Side: Text & Email */}
           <ScrollReveal delay={100}>
             <div className="contact-content">
               <p className="kicker">Have an idea?</p>
@@ -458,7 +436,6 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
             </div>
           </ScrollReveal>
 
-          {/* Right Side: The Form */}
           <ScrollReveal delay={200}>
             <ContactForm />
           </ScrollReveal>
@@ -470,6 +447,97 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
         <span>Designed & built with intention.</span>
         <span className="mono">AM / 001</span>
       </footer>
+
+            {/* NEW: PROFESSIONAL PROJECT MODAL */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-0 md:p-8 backdrop-blur-md"
+            onClick={() => setSelectedProject(null)}
+          >
+            <motion.div 
+              initial={{ y: 100, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#f4f4f0] text-[#111] md:rounded-3xl w-full max-w-5xl h-full md:h-auto md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative"
+            >
+              {/* Close Button */}
+              <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20">
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="bg-white/90 hover:bg-white backdrop-blur-md text-black p-3 rounded-full shadow-lg transition-transform hover:scale-105 border border-black/5"
+                  
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Scrollable Container with Custom Scrollbar */}
+              <div className="overflow-y-auto w-full h-full [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/40">
+                {/* Hero Image */}
+                {selectedProject.image && (
+                  <div className="w-full h-[35vh] md:h-[50vh] relative">
+                    <img src={selectedProject.image} alt="Cover" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#f4f4f0] via-transparent to-transparent" />
+                  </div>
+                )}
+
+                {/* Content Body */}
+                <div className={`px-6 pb-12 md:px-16 md:pb-20 max-w-4xl mx-auto ${selectedProject.image ? '-mt-16 md:-mt-24 relative z-10' : 'pt-20'}`}>
+                  <p className="text-xs md:text-sm font-bold tracking-widest uppercase mb-3 text-black/50">
+                    {selectedProject.type} / {selectedProject.year}
+                  </p>
+                  
+                  <h2 className="text-4xl md:text-6xl font-serif mb-6 leading-tight">
+                    {selectedProject.title}
+                  </h2>
+                  
+                  <div className="flex flex-wrap gap-2 mb-10">
+                    {selectedProject.stack.map((s: string) => (
+                      <span key={s} className="px-3 py-1.5 md:px-4 md:py-2 bg-black/5 rounded-full text-xs md:text-sm font-medium">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="text-lg md:text-xl leading-relaxed text-black/80 whitespace-pre-wrap mb-12">
+                    {selectedProject.description}
+                  </div>
+
+                  {/* Secondary Image */}
+                  {selectedProject.image2 && (
+                    <div className="mb-12 rounded-xl md:rounded-2xl overflow-hidden shadow-xl border border-black/5 bg-white">
+                      <img src={selectedProject.image2} alt="Secondary view" className="w-full h-auto" />
+                    </div>
+                  )}
+
+                  {/* CTA Button */}
+                                    {/* CTA Button */}
+                  <div className="flex justify-start md:justify-center py-6 border-t border-black/10">
+                    {selectedProject.url && (
+                      <a 
+                        href={selectedProject.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl"
+                        style={{ backgroundColor: '#111', color: '#fff' }}
+                      >
+                        Visit Live Site <ArrowUpRight size={18} color="#fff" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </main>
   )
 }
@@ -493,19 +561,14 @@ function ContactForm() {
     } else {
       setStatus('success')
       formRef.current?.reset()
-      // Reset back to idle after 4 seconds
       setTimeout(() => setStatus('idle'), 4000)
     }
   }
 
-  return (
+    return (
     <div className="form-wrapper">
       {status === 'success' ? (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          className="form-success"
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="form-success">
           <div className="success-icon">✓</div>
           <h3>Message Sent!</h3>
           <p>Thank you for reaching out. I&apos;ll get back to you shortly.</p>
@@ -514,35 +577,28 @@ function ContactForm() {
         <form ref={formRef} onSubmit={handleSubmit} className="contact-form">
           <div className="form-group">
             <label>Name</label>
-            <input name="name" type="text" required placeholder="John Doe" />
+            <input name="name" type="text" required placeholder="Your full name" />
           </div>
           <div className="form-group">
             <label>Email</label>
-            <input name="email" type="email" required placeholder="john@example.com" />
+            <input name="email" type="email" required placeholder="you@company.com" />
           </div>
           <div className="form-group">
             <label>Message</label>
-            <textarea name="message" required placeholder="Tell me about your project..." rows={4} />
+            <textarea 
+              name="message" 
+              required 
+              placeholder="Tell me what you're looking to build..." 
+              rows={4} 
+            />
           </div>
 
           {status === 'error' && <p className="form-error">{errorMessage}</p>}
 
-          <motion.button 
-            type="submit" 
-            className="form-submit"
-            disabled={status === 'loading'}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.button type="submit" className="form-submit" disabled={status === 'loading'} whileTap={{ scale: 0.98 }}>
             {status === 'loading' ? 'Sending...' : 'Send Message'}
-            
-            {/* The Progress Bar */}
             {status === 'loading' && (
-              <motion.div 
-                className="progress-bar"
-                initial={{ width: '0%' }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 1.2, ease: 'easeInOut' }}
-              />
+              <motion.div className="progress-bar" initial={{ width: '0%' }} animate={{ width: '100%' }} transition={{ duration: 1.2, ease: 'easeInOut' }} />
             )}
           </motion.button>
         </form>

@@ -8,5 +8,20 @@ export const user = pgTable("user", {
 export const session = pgTable("session", { id: text("id").primaryKey(), expiresAt: timestamp("expiresAt").notNull(), token: text("token").notNull().unique(), createdAt: timestamp("createdAt").notNull().defaultNow(), updatedAt: timestamp("updatedAt").notNull().defaultNow(), ipAddress: text("ipAddress"), userAgent: text("userAgent"), userId: text("userId").notNull() })
 export const account = pgTable("account", { id: text("id").primaryKey(), accountId: text("accountId").notNull(), providerId: text("providerId").notNull(), userId: text("userId").notNull(), accessToken: text("accessToken"), refreshToken: text("refreshToken"), idToken: text("idToken"), accessTokenExpiresAt: timestamp("accessTokenExpiresAt"), refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt"), scope: text("scope"), password: text("password"), createdAt: timestamp("createdAt").notNull().defaultNow(), updatedAt: timestamp("updatedAt").notNull().defaultNow() })
 export const verification = pgTable("verification", { id: text("id").primaryKey(), identifier: text("identifier").notNull(), value: text("value").notNull(), expiresAt: timestamp("expiresAt").notNull(), createdAt: timestamp("createdAt").notNull().defaultNow(), updatedAt: timestamp("updatedAt").notNull().defaultNow() })
-export const projects = pgTable("projects", { id: text("id").primaryKey(), userId: text("userId").notNull(), title: text("title").notNull(), description: text("description").notNull(), stack: text("stack").notNull(), url: text("url"), image: text("image"), featured: boolean("featured").notNull().default(false), createdAt: timestamp("createdAt").notNull().defaultNow(), updatedAt: timestamp("updatedAt").notNull().defaultNow() })
+
+// Added image2 here 👇
+export const projects = pgTable("projects", { 
+  id: text("id").primaryKey(), 
+  userId: text("userId").notNull(), 
+  title: text("title").notNull(), 
+  description: text("description").notNull(), 
+  stack: text("stack").notNull(), 
+  url: text("url"), 
+  image: text("image"), 
+  image2: text("image2"), // <-- The new column for the second image
+  featured: boolean("featured").notNull().default(false), 
+  createdAt: timestamp("createdAt").notNull().defaultNow(), 
+  updatedAt: timestamp("updatedAt").notNull().defaultNow() 
+})
+
 export const inquiries = pgTable("inquiries", { id: text("id").primaryKey(), name: text("name").notNull(), email: text("email").notNull(), message: text("message").notNull(), status: text("status").notNull().default("new"), createdAt: timestamp("createdAt").notNull().defaultNow() })

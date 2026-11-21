@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { inquiries, projects } from '@/lib/db/schema'
 import { and, desc, eq } from 'drizzle-orm'
+import { put } from '@vercel/blob' 
 
 const ADMIN_EMAIL = 'joeama25@gmail.com'
 
@@ -30,7 +31,10 @@ export async function saveProject(input: {
   description: string; 
   stack: string; 
   url?: string; 
-  image?: string; // <-- Added image here
+  imageFile1?: File;
+  imageFile2?: File;
+  existingImage1?: string; 
+  existingImage2?: string;
   featured: boolean 
 }) {
   const user = await getAdmin()
@@ -38,17 +42,31 @@ export async function saveProject(input: {
   const description = input.description.trim()
   const stack = input.stack.trim()
   const url = input.url?.trim() || null
-  const image = input.image?.trim() || null // <-- Handle image
+  
+  let image = input.existingImage1 || null;
+  let image2 = input.existingImage2 || null;
+
+  // Upload first image if provided
+  if (input.imageFile1) {
+    const blob1 = await put(input.imageFile1.name, input.imageFile1, { access: 'public', addRandomSuffix: true });
+    image = blob1.url;
+  }
+
+  // Upload second image if provided
+  if (input.imageFile2) {
+    const blob2 = await put(input.imageFile2.name, input.imageFile2, { access: 'public', addRandomSuffix: true });
+    image2 = blob2.url;
+  }
 
   if (!title || !description || !stack) throw new Error('Title, description, and stack are required.')
 
   if (input.id) {
     await db.update(projects)
-      .set({ title, description, stack, url, image, featured: input.featured, updatedAt: new Date() })
+      .set({ title, description, stack, url, image, image2, featured: input.featured, updatedAt: new Date() })
       .where(and(eq(projects.id, input.id), eq(projects.userId, user.id)))
   } else {
     await db.insert(projects)
-      .values({ id: crypto.randomUUID(), userId: user.id, title, description, stack, url, image, featured: input.featured })
+      .values({ id: crypto.randomUUID(), userId: user.id, title, description, stack, url, image, image2, featured: input.featured })
   }
   
   revalidatePath('/admin')
