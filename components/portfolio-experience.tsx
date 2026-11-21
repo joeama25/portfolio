@@ -449,55 +449,58 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
       </footer>
 
             {/* NEW: PROFESSIONAL PROJECT MODAL */}
-      <AnimatePresence>
+            <AnimatePresence>
         {selectedProject && (
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-0 md:p-8 backdrop-blur-md"
+            // Changed to justify-end to pin to the right, and removed padding
+            className="fixed inset-0 z-[100] flex justify-end bg-black/40 backdrop-blur-sm cursor-pointer"
             onClick={() => setSelectedProject(null)}
           >
             <motion.div 
-              initial={{ y: 100, opacity: 0 }} 
-              animate={{ y: 0, opacity: 1 }} 
-              exit={{ y: 50, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 25 }}
+              // Changed animation from Y (bottom-to-top) to X (right-to-left)
+              initial={{ x: '100%' }} 
+              animate={{ x: 0 }} 
+              exit={{ x: '100%' }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#f4f4f0] text-[#111] md:rounded-3xl w-full max-w-5xl h-full md:h-auto md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative"
+              // Changed width to max-w-2xl (narrower) and made it full height with a left border
+              className="bg-[#f4f4f0] text-[#111] w-full md:max-w-2xl h-full overflow-hidden flex flex-col shadow-2xl relative cursor-default border-l border-black/10"
             >
               {/* Close Button */}
               <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20">
                 <button 
                   onClick={() => setSelectedProject(null)}
-                  className="bg-white/90 hover:bg-white backdrop-blur-md text-black p-3 rounded-full shadow-lg transition-transform hover:scale-105 border border-black/5"
-                  
+                  className="bg-white/90 hover:bg-white backdrop-blur-md text-black p-3 rounded-full shadow-lg transition-transform hover:scale-105 border border-black/5 cursor-pointer"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Scrollable Container with Custom Scrollbar */}
+              {/* Scrollable Container */}
               <div className="overflow-y-auto w-full h-full [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-black/40">
+                
                 {/* Hero Image */}
                 {selectedProject.image && (
-                  <div className="w-full h-[35vh] md:h-[50vh] relative">
+                  <div className="w-full h-[30vh] md:h-[40vh] relative">
                     <img src={selectedProject.image} alt="Cover" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#f4f4f0] via-transparent to-transparent" />
                   </div>
                 )}
 
                 {/* Content Body */}
-                <div className={`px-6 pb-12 md:px-16 md:pb-20 max-w-4xl mx-auto ${selectedProject.image ? '-mt-16 md:-mt-24 relative z-10' : 'pt-20'}`}>
+                <div className={`px-6 pb-12 md:px-10 md:pb-16 w-full ${selectedProject.image ? '-mt-12 md:-mt-16 relative z-10' : 'pt-20'}`}>
                   <p className="text-xs md:text-sm font-bold tracking-widest uppercase mb-3 text-black/50">
                     {selectedProject.type} / {selectedProject.year}
                   </p>
                   
-                  <h2 className="text-4xl md:text-6xl font-serif mb-6 leading-tight">
+                  <h2 className="text-4xl md:text-5xl font-serif mb-6 leading-tight">
                     {selectedProject.title}
                   </h2>
                   
-                  <div className="flex flex-wrap gap-2 mb-10">
+                  <div className="flex flex-wrap gap-2 mb-8">
                     {selectedProject.stack.map((s: string) => (
                       <span key={s} className="px-3 py-1.5 md:px-4 md:py-2 bg-black/5 rounded-full text-xs md:text-sm font-medium">
                         {s}
@@ -505,26 +508,25 @@ export function PortfolioExperience({ projects = [] }: { projects?: DBProject[] 
                     ))}
                   </div>
 
-                  <div className="text-lg md:text-xl leading-relaxed text-black/80 whitespace-pre-wrap mb-12">
+                  <div className="text-base md:text-lg leading-relaxed text-black/80 whitespace-pre-wrap mb-10">
                     {selectedProject.description}
                   </div>
 
                   {/* Secondary Image */}
                   {selectedProject.image2 && (
-                    <div className="mb-12 rounded-xl md:rounded-2xl overflow-hidden shadow-xl border border-black/5 bg-white">
+                    <div className="mb-10 rounded-xl overflow-hidden shadow-xl border border-black/5 bg-white">
                       <img src={selectedProject.image2} alt="Secondary view" className="w-full h-auto" />
                     </div>
                   )}
 
                   {/* CTA Button */}
-                                    {/* CTA Button */}
-                  <div className="flex justify-start md:justify-center py-6 border-t border-black/10">
+                  <div className="flex justify-start py-6 border-t border-black/10">
                     {selectedProject.url && (
                       <a 
                         href={selectedProject.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl"
+                        className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-transform hover:-translate-y-1 hover:shadow-xl cursor-pointer w-full justify-center"
                         style={{ backgroundColor: '#111', color: '#fff' }}
                       >
                         Visit Live Site <ArrowUpRight size={18} color="#fff" />
