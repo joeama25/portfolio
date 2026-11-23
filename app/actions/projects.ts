@@ -11,10 +11,11 @@ export async function getPublicProjects() {
       .from(projects)
       .where(eq(projects.featured, true))
       .orderBy(desc(projects.createdAt))
-    
+
     return featuredProjects
   } catch (error) {
-    console.error('Failed to fetch public projects:', error)
-    return []
+    console.error("Database is asleep or unreachable:", error)
+    // If the DB is asleep, return an empty array so the homepage doesn't crash
+    return [] 
   }
 }

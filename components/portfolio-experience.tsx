@@ -549,21 +549,27 @@ function ContactForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setStatus('loading')
     setErrorMessage('')
 
-    const formData = new FormData(e.currentTarget)
-    const result = await submitInquiry(formData)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const result = await submitInquiry(formData)
 
-    if (result?.error) {
-      setErrorMessage(result.error)
+      if (result?.error) {
+        setErrorMessage(result.error)
+        setStatus('error')
+      } else {
+        setStatus('success')
+        formRef.current?.reset()
+        setTimeout(() => setStatus('idle'), 5000)
+      }
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('A network error occurred. Please try again.')
       setStatus('error')
-    } else {
-      setStatus('success')
-      formRef.current?.reset()
-      setTimeout(() => setStatus('idle'), 4000)
     }
   }
 
